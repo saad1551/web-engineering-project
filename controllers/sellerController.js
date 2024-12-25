@@ -74,8 +74,11 @@ const registerSeller = asyncHandler(async (req, res) => {
         content: emailTemplate
     });
 
+    const sellerResponse = seller.toObject();
+    delete sellerResponse.password;
+
     res.status(201).json({
-        seller: seller,
+        seller: sellerResponse,
         message: 'Seller registered successfully. Please check your email to verify your account.'
     });
 });

@@ -1,10 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 
 const sellerRouter = require('./routes/sellerRoute');
-const mongoose = require('mongoose');
+const buyerRouter = require('./routes/buyerRoute');
 
 // Load env vars
 dotenv.config();
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 
 // Mount routers
 app.use('/api/sellers', sellerRouter);
+app.use('/api/buyers', buyerRouter);
 
 // Define port
 const PORT = process.env.PORT || 5000;

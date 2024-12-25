@@ -37,7 +37,7 @@ const BuyerSchema = new moongoose.Schema({
         // make sure it is an eleven digit phone number
         match: [/^\d{11}$/]
     },
-    isVerfiied: {
+    isVerified: {
         type: Boolean,
         default: false
     }
@@ -50,8 +50,8 @@ BuyerSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next(); // Skip hashing if the password is not modified
     }
-    const salt = bcrypt.genSalt(parseInt(process.env.HASHING_SALT_ROUNDS));
-    this.password = bcrypt.hash(this.password, salt);
+    const salt = await bcrypt.genSalt(parseInt(process.env.HASHING_SALT_ROUNDS));
+    this.password = await bcrypt.hash(this.password, salt);
     next();
 })
 
