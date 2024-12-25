@@ -4,6 +4,7 @@ const EmailVerificationToken = require('../models/verificationTokenModel');
 const jwt = require('jsonwebtoken');
 const sendEMail = require('../utils/sendEmail');
 const bcrypt = require('bcryptjs');
+const PasswordResetToken = require('../models/passwordResetTokenModel');
 
 // endpoint to register the buyer
 const register = asyncHandler(async (req, res) => {
@@ -168,5 +169,95 @@ const logout = asyncHandler(async (req, res) => {
     });
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
 
-module.exports = { register, verifyEmail, login, logout };
+    if (!email) {
+        res.status(400);
+        throw new Error('Email is required');
+    }
+
+    const buyer = await Buyer.findOne({ email });
+
+    if (!buyer) {
+        res.status(404);
+        throw new Error('Account not found');
+    }
+
+    const resetToken = jwt.sign({ id: buyer._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    await PasswordResetToken.create({
+        userId: buyer._id,
+        token: resetToken
+    });
+
+    // send reset password email
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    const emailTemplate = `
+        <h1>Reset Password</h1>
+        <p>Please click the link below to reset your password:</p>
+        <a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">Reset Password</a>
+        <p>If you did not request a password reset, please ignore this email.</p>
+        <p>Best regards,<br>Dastkaar Team</p>
+    `;
+
+    await sendEMail({
+        send_to: email,
+        subject: 'Reset Password',
+        content: emailTemplate
+    });
+
+    res.status(200).json({
+        message: 'Password reset email sent'
+    });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { password } = req.body;
+    const token = req.query.token;
+
+    if (!password ) {
+        res.status(400);
+        throw new Error('Password and confirm password are required');
+    }
+
+    if (!token) {
+        res.status(400);
+        throw new Error('Token is required');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    const resetToken = await PasswordResetToken.findOne({ userId: decoded.id, token });
+
+    if (!resetToken) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    const buyer = await Buyer.findById(decoded.id);
+
+    if (!buyer) {
+        res.status(404);
+        throw new Error('Account not found');
+    }
+
+    buyer.password = password;
+
+    await buyer.save();
+
+    await PasswordResetToken.findByIdAndDelete(resetToken._id);
+
+    res.status(200).json({
+        message: 'Password reset successfully'
+    });
+});
+
+
+module.exports = { register, verifyEmail, login, logout, forgotPassword, resetPassword };
