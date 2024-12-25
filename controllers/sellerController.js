@@ -215,10 +215,52 @@ const forgotPassword = asyncHandler(async (req, res) => {
     });
 });
 
+const resetPassword = asyncHandler(async (req, res) => {
+    const token = req.query.token;
+    const { password } = req.body;
+
+    if (!token) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    if (!password) {
+        res.status(400);
+        throw new Error('Password is required');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const resetToken = await PasswordResetToken.findOne({ userId: decoded.id, token });
+
+    if (!resetToken) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    const seller = await Seller.findById(decoded.id);
+
+    if (!seller) {
+        res.status(404);
+        throw new Error('Seller not found');
+    }
+
+    seller.password = password;
+
+    await seller.save();
+
+    await PasswordResetToken.findByIdAndDelete(resetToken._id);
+
+    res.status(200).json({
+        message: 'Password reset successfully'
+    });
+});
+
 module.exports = {
     registerSeller,
     verifyEmail,
     login,
     logout,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 }
