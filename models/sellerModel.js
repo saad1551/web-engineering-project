@@ -49,6 +49,10 @@ const SellerSchema = new mongoose.Schema({
         type: String,
         // make sure it is an eleven digit phone number
         match: [/^\d{11}$/]
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
