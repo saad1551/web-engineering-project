@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const sellerRouter = require('./routes/sellerRoute');
 const mongoose = require('mongoose');
@@ -14,6 +15,7 @@ const app = express();
 // add parsing middlewares
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Define routes
 app.get('/', (req, res) => {

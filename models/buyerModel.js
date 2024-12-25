@@ -19,7 +19,6 @@ const BuyerSchema = new moongoose.Schema({
         type: String,
         required: [true, 'Please add a password'],
         minlength: 6,
-        select: false
     },
     // Date of Birth
     dateOfBirth: { 
@@ -51,8 +50,8 @@ BuyerSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next(); // Skip hashing if the password is not modified
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    const salt = bcrypt.genSalt(parseInt(process.env.HASHING_SALT_ROUNDS));
+    this.password = bcrypt.hash(this.password, salt);
     next();
 })
 

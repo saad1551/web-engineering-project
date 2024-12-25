@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const sendEMail = require("../utils/sendEmail");
 const EmailVerificationToken = require('../models/verificationTokenModel');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const Seller = require('../models/sellerModel');
 
@@ -113,7 +114,58 @@ const verifyEmail = asyncHandler(async (req, res) => {
     });
 });
 
+const login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    // validate the data
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('All fields are required');
+    }
+
+    // check if the seller exists
+    const seller = await Seller.findOne({ email });
+
+    if (!seller) {
+        res.status(404);
+        throw new Error('Seller account not found');
+    }
+
+    const isCorrectPassword = await bcrypt.compare(password, seller.password);
+
+    if (!isCorrectPassword) {
+        res.status(401);
+        throw new Error('Invalid email or password');
+    }
+
+    // check if the seller is verified
+    if (!seller.isVerified) {
+        res.status(401);
+        throw new Error('Email not verified');
+    }
+
+    // generate token
+    const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    // set the cookie
+    res.cookie('token', token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    });
+
+    res.status(200).json({
+        seller: {
+            id: seller._id,
+            name: seller.name,
+            email: seller.email,
+            isVerified: seller.isVerified
+        },
+        token
+    });
+});
+
 module.exports = {
     registerSeller,
-    verifyEmail
+    verifyEmail,
+    login
 }
