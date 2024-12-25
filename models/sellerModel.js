@@ -61,9 +61,13 @@ const SellerSchema = new mongoose.Schema({
 
 // add middleware to hash the password before saving
 SellerSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) {
+        return next(); // Skip hashing if the password is not modified
+    }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-})
+    next();
+});
 
 const SellerModel = mongoose.model('Seller', SellerSchema);
 

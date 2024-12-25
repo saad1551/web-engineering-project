@@ -78,6 +78,42 @@ const registerSeller = asyncHandler(async (req, res) => {
     });
 });
 
+const verifyEmail = asyncHandler(async (req, res) => {
+    const token = req.query.token;
+
+    if (!token) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const verificationToken = await EmailVerificationToken.findOne({ userId: decoded.id, token });
+
+    if (!verificationToken) {
+        res.status(400);
+        throw new Error('Invalid token');
+    }
+
+    const seller = await Seller.findById(decoded.id);
+
+    if (!seller) {
+        res.status(404);
+        throw new Error('Seller not found');
+    }
+
+    seller.isVerified = true;
+
+    await seller.save();
+
+    await EmailVerificationToken.findByIdAndDelete(verificationToken._id);
+
+    res.status(200).json({
+        message: 'Email verified successfully'
+    });
+});
+
 module.exports = {
-    registerSeller
+    registerSeller,
+    verifyEmail
 }
