@@ -50,7 +50,10 @@ const SellerSchema = new mongoose.Schema({
         // make sure it is an eleven digit phone number
         match: [/^\d{11}$/]
     }
-})
+}, {
+    timestamps: true
+}
+)
 
 // add middleware to hash the password before saving
 SellerSchema.pre('save', async function(next) {
