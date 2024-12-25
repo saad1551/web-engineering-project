@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 
+const sellerRouter = require('./routes/sellerRoute');
+
 // Load env vars
 dotenv.config();
 
@@ -11,6 +13,9 @@ const app = express();
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
+
+// Mount routers
+app.use('/api/sellers', sellerRouter);
 
 // Define port
 const PORT = process.env.PORT || 5000;
