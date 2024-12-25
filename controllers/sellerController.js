@@ -256,11 +256,44 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
+const editProfile = asyncHandler(async (req, res) => {
+    const { name, email, DOB, district, division, province, phoneNumber } = req.body;
+
+    // check that all values are provided
+    if (!name || !email || !DOB || !district || !division || !province || !phoneNumber) {
+        res.status(400);
+        throw new Error('All fields are required');
+    }
+
+    // find seller
+    const seller = await Seller.findOne({ email });
+
+    if (!seller) {
+        res.status(404);
+        throw new Error('Seller not found');
+    }
+
+    seller.name = name || seller.name;
+    seller.email = email || seller.email;
+    seller.dateOfBirth = DOB ? new Date(DOB) : seller.dateOfBirth;
+    seller.district = district || seller.district;
+    seller.division = division || seller.division;
+    seller.province = province || seller.province;
+    seller.phoneNumber = phoneNumber || seller.phoneNumber;
+
+    await seller.save();
+
+    res.status(200).json({
+        seller
+    });
+});
+
 module.exports = {
     registerSeller,
     verifyEmail,
     login,
     logout,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    editProfile
 }
