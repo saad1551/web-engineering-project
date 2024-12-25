@@ -161,5 +161,12 @@ const login = asyncHandler(async (req, res) => {
     });
 });
 
+const logout = asyncHandler(async (req, res) => {
+    res.clearCookie('token');
+    res.status(200).json({
+        message: 'Logged out successfully'
+    });
+});
 
-module.exports = { register, verifyEmail, login };
+
+module.exports = { register, verifyEmail, login, logout };
