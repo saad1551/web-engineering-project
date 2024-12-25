@@ -259,5 +259,39 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
+const editProfile = asyncHandler(async (req, res) => {
+    const { name, email, DOB, phoneNumber } = req.body;
 
-module.exports = { register, verifyEmail, login, logout, forgotPassword, resetPassword };
+    // check that all values are provided
+    if (!name || !email || !DOB || !phoneNumber) {
+        res.status(400);
+        throw new Error('All fields are required');
+    }
+
+    // get the buyer id from the token
+    const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+
+    // find the buyer
+    const buyer = await Buyer.findById(decoded.id);
+
+    if (!buyer) {
+        res.status(404);
+        throw new Error('Buyer not found');
+    }
+
+    // update the buyer
+    buyer.name = name;
+    buyer.email = email;
+    buyer.DOB = DOB;
+    buyer.phoneNumber = phoneNumber;
+
+    await buyer.save();
+
+    res.status(200).json({
+        buyer,
+        message: 'Profile updated successfully'
+    });
+});
+
+
+module.exports = { register, verifyEmail, login, logout, forgotPassword, resetPassword, editProfile };
