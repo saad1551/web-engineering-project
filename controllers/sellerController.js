@@ -164,7 +164,8 @@ const login = asyncHandler(async (req, res) => {
             email: seller.email,
             isVerified: seller.isVerified
         },
-        token
+        token,
+        message: 'Logged in successfully'
     });
 });
 

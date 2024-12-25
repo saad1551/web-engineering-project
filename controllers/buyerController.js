@@ -3,6 +3,7 @@ const Buyer = require('../models/buyerModel');
 const EmailVerificationToken = require('../models/verificationTokenModel');
 const jwt = require('jsonwebtoken');
 const sendEMail = require('../utils/sendEmail');
+const bcrypt = require('bcryptjs');
 
 // endpoint to register the buyer
 const register = asyncHandler(async (req, res) => {
@@ -112,5 +113,53 @@ const verifyEmail = asyncHandler(async (req, res) => {
     });
 });
 
+const login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
 
-module.exports = { register, verifyEmail };
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('Email and password are required');
+    }
+
+    const buyer = await Buyer.findOne({ email });
+
+    if (!buyer) {
+        res.status(404);
+        throw new Error('Invalid email or password');
+    }
+
+    if (!buyer.isVerified) {
+        res.status(401);
+        throw new Error('Email is not verified');
+    }
+
+    const isCorrectPassword = await bcrypt.compare(password, buyer.password);
+
+    if (!isCorrectPassword) {
+        res.status(401);
+        throw new Error('Invalid email or password');
+    }
+
+    const token = jwt.sign({ id: buyer._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    // set the cookie
+    res.cookie('token', token, {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        httpOnly: true
+    });
+
+    res.status(200).json({
+        buyer: {
+            _id: buyer._id,
+            name: buyer.name,
+            email: buyer.email,
+            phoneNumber: buyer.phoneNumber,
+            isVerified: buyer.isVerified
+        },
+        token,
+        message: 'Logged in successfully'
+    });
+});
+
+
+module.exports = { register, verifyEmail, login };
