@@ -12,12 +12,47 @@ cloudinary.config({
     api_secret: '3fqyXvEfi5gDriGAFzGjmAZLxZ8',
 });
 
+// Function to get related products by product ID
+const retrieveRelatedProducts = asyncHandler(async (req, res, productId) => {
+    // Find the product by ID
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        res.status(404);
+        throw new Error('Product not found');
+    }
+
+    // Find the category of the product
+    const category = await Category.findById(product.categoryId);
+
+    if (!category) {
+        res.status(404);
+        throw new Error('Category not found');
+    }
+
+    // Find the category group of the category
+    const categoryGroup = await CategoryGroup.findById(category.categoryGroup);
+
+    if (!categoryGroup) {
+        res.status(404);
+        throw new Error('Category group not found');
+    }
+
+    // Find related products that belong to the same category group, should not include the product itself
+    const relatedProducts = await Product.find({
+        categoryId: { $in: categoryGroup.categories },
+        _id: { $ne: productId }
+    }).limit(10); // Limit to 10 related products
+
+    return relatedProducts;
+});
+
 const addProduct = asyncHandler(async (req, res) => {
-    const { name, price, description, category, isMakeToOrder, preparationDays, quantity } = req.body;
+    const { name, price, description, categoryId, isMakeToOrder, preparationDays, quantity } = req.body;
 
     const sellerId = req.user._id;
 
-    if (!name || !price || !description || !category  ) {
+    if (!name || !price || !description || !categoryId  ) {
         res.status(400);
         throw new Error('Please add all required fields');
     }
@@ -47,7 +82,11 @@ const addProduct = asyncHandler(async (req, res) => {
         throw new Error('Quantity must be specified for a product that is not make to order');
     }
 
-    const letter = category.slice(0, 3).toUpperCase();
+    const category = await Category.findById(categoryId);
+
+    const categoryName = category.name;
+
+    const letter = categoryName.slice(0, 3).toUpperCase();
     const number = Date.now();
     const SKU = letter + "-" + number;
 
@@ -88,7 +127,7 @@ const addProduct = asyncHandler(async (req, res) => {
         name,
         price,
         description,
-        category,
+        categoryId,
         sellerId,
         SKU,
         image,
@@ -100,7 +139,7 @@ const addProduct = asyncHandler(async (req, res) => {
     const createdProduct = await product.save();
 
     res.status(201).json({
-        menssage: 'Product added successfully',
+        message: 'Product added successfully',
         product: { ...createdProduct.toObject(), imageData: fileData }
     });
 });
@@ -290,12 +329,15 @@ const getCategories = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 
+    // get related products which belong to the same category group as this product
+    const relatedProducts = await retrieveRelatedProducts(req, res, req.params.id);
+
     if (product) {
-        res.status(200).json({product});
+        res.status(200).json({ product, relatedProducts });
     } else {
         res.status(404);
         throw new Error('Product not found');
     }
 });
 
-module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById };
+module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById, retrieveRelatedProducts };

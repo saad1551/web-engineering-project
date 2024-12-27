@@ -13,8 +13,9 @@ const ProductSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please add a description']
     },
-    category: {
-        type: String,
+    categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
         required: [true, 'Please add a category']
     },
     sellerId: {
