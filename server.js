@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require('path');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('./middlewares/errorMiddleware');
 
@@ -20,6 +21,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(errorHandler);
+
+app.use("/uploads", express.static(path.join(__dirname,
+    "uploads"
+)));
 
 // Define routes
 app.get('/', (req, res) => {
