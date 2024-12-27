@@ -353,5 +353,37 @@ const getSellerProducts = asyncHandler(async (req, res) => {
     }
 });
 
+// get products by category
+const getProductsByCategory = asyncHandler(async (req, res) => {
+    const category = await Category.findById(req.params.categoryId);
 
-module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById, retrieveRelatedProducts, getSellerProducts };
+    const products = await Product.find({ categoryId: category._id });
+
+    // get category group
+    const categoryGroup = await CategoryGroup.findById(category.categoryGroup);
+
+    // get other categories in the same category group, excluding this category
+    const otherCategories = await Category.find({ categoryGroup: categoryGroup._id, _id: { $ne: category._id } });
+
+    // find related products belonging to other categories in the same category group
+    const relatedProducts = await Product.find({ categoryId: { $in: otherCategories.map(category => category._id) } });
+
+    if (products) {
+        res.status(200).json({ products, relatedProducts });
+    } else {
+        res.status(404);
+        throw new Error('No products found for this category');
+    }
+});
+
+
+module.exports = { 
+    addProduct, 
+    getAllProducts, 
+    createCategories, 
+    getCategories, 
+    getProductById, 
+    retrieveRelatedProducts, 
+    getSellerProducts,
+    getProductsByCategory
+};

@@ -1,4 +1,12 @@
-const { addProduct, getAllProducts, createCategories, getCategories, getProductById, getSellerProducts } = require('../controllers/productController');
+const { 
+    addProduct, 
+    getAllProducts, 
+    createCategories, 
+    getCategories, 
+    getProductById, 
+    getSellerProducts,
+    getProductsByCategory
+} = require('../controllers/productController');
 const { upload } = require('../utils/fileUpload');
 const protectAuthSeller = require('../middlewares/authSellerMiddleware');
 const protectAuthAdmin = require('../middlewares/authAdminMiddleware');
@@ -13,6 +21,7 @@ router.get('/create-categories', protectAuthAdmin, createCategories);
 router.get('/get-categories', getCategories);
 router.get('/seller', protectAuthSeller, getSellerProducts);
 router.get('/:id', getProductById);
+router.get('/category/:categoryId', getProductsByCategory);
 
 
 
