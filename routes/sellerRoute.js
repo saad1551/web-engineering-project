@@ -7,7 +7,7 @@ const { registerSeller, verifyEmail, login, logout, forgotPassword, resetPasswor
 const router = express.Router();
 
 router.post('/register', registerSeller);
-router.post('/verify-email', verifyEmail);
+router.get('/verify-email', verifyEmail);
 router.post('/login', login);
 router.get('/logout', logout);
 router.post('/forgot-password', forgotPassword);
