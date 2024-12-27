@@ -32,6 +32,29 @@ const ProductSchema = mongoose.Schema({
         // make sure it is a URL
         match: [/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/],
         required: [true, 'Please add an image'],
+    },
+    makeToOrder: {
+        type: Boolean,
+        default: false
+    },
+    preparationDays: {
+        type: Number,
+        default: null,
+        validate: {
+            validator: function(value) {
+                return this.makeToOrder ? value !== null : true;
+            },
+            message: 'Preparation days should not be null if makeToOrder is true'
+        }
+    },
+    quantity: {
+        type: Number,
+        validate: {
+            validator: function(value) {
+                return !this.makeToOrder ? value !== null : true;
+            },
+            message: 'Quantity should not be null if makeToOrder is false'
+        }
     }
 }, {
     timestamps: true
