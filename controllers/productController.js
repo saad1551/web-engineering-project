@@ -340,4 +340,18 @@ const getProductById = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById, retrieveRelatedProducts };
+
+// get products uploaded by a specific seller
+const getSellerProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find({ sellerId: req.user._id });
+
+    if (products) {
+        res.status(200).json({ products });
+    } else {
+        res.status(404);
+        throw new Error('No products found for this seller');
+    }
+});
+
+
+module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById, retrieveRelatedProducts, getSellerProducts };
