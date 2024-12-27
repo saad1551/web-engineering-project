@@ -3,12 +3,18 @@ const Product = require('../models/productModel');
 const fileSizeFormatter = require('../utils/fileUpload');
 const cloudinary = require('cloudinary').v2;
 
+cloudinary.config({
+    cloud_name: 'duzcz6brw', // Replace with your cloud name
+    api_key: '244261789276373',
+    api_secret: '3fqyXvEfi5gDriGAFzGjmAZLxZ8',
+});
+
 const addProduct = asyncHandler(async (req, res) => {
     const { name, price, description, category, isMakeToOrder, preparationDays, quantity } = req.body;
 
-    const seller = req.user._id;
+    const sellerId = req.user._id;
 
-    if (!name || !price || !description || !category || !seller || !SKU ) {
+    if (!name || !price || !description || !category  ) {
         res.status(400);
         throw new Error('Please add all required fields');
     }
@@ -37,24 +43,32 @@ const addProduct = asyncHandler(async (req, res) => {
     // Handle image upload
     let fileData = {};
 
+    if (req.image) {
+        console.log("image present");
+    }
+
     if (req.file) {
         // Save image to cloudinary
         let uploadedFile;
+        console.log(req.file.path);
         try {
             uploadedFile = await cloudinary.uploader.upload(req.file.path,
                 {folder: "dastkaar", resource_type: "image"}
             )
         } catch (error) {
             res.status(500);
-            throw new Error("Image could not be uploaded");
+            throw new Error("Image could not be uploaded " + error);
         }
 
         fileData = {
             fileName: req.file.originalname,
             filePath: uploadedFile.secure_url,
             fileType: req.file.mimetype,
-            fileSize: fileSizeFormatter(req.file.size),
+            // fileSize: fileSizeFormatter(req.file.size),
         }
+    } else {
+        res.status(400);
+        throw new Error('Please upload an image');
     }
 
     const image = fileData.filePath;
@@ -64,7 +78,7 @@ const addProduct = asyncHandler(async (req, res) => {
         price,
         description,
         category,
-        seller,
+        sellerId,
         SKU,
         image,
         makeToOrder,
@@ -76,7 +90,7 @@ const addProduct = asyncHandler(async (req, res) => {
 
     res.status(201).json({
         menssage: 'Product added successfully',
-        product: { ...createdProduct, imageData: fileData }
+        product: { ...createdProduct.toObject(), imageData: fileData }
     });
 });
 

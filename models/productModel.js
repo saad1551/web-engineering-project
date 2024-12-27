@@ -17,7 +17,7 @@ const ProductSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please add a category']
     },
-    seller: {
+    sellerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
         required: true
