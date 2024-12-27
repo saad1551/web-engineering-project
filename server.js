@@ -3,9 +3,11 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const errorHandler = require('./middlewares/errorMiddleware');
 
 const sellerRouter = require('./routes/sellerRoute');
 const buyerRouter = require('./routes/buyerRoute');
+const productRouter = require('./routes/productRoute');
 
 // Load env vars
 dotenv.config();
@@ -17,6 +19,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(errorHandler);
 
 // Define routes
 app.get('/', (req, res) => {
@@ -26,6 +29,7 @@ app.get('/', (req, res) => {
 // Mount routers
 app.use('/api/sellers', sellerRouter);
 app.use('/api/buyers', buyerRouter);
+app.use('/api/products/', productRouter);
 
 // Define port
 const PORT = process.env.PORT || 5000;
