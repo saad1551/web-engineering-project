@@ -19,7 +19,7 @@ router.get('/', getAllProducts);
 router.post('/add-product', protectAuthSeller, upload.single("image"), addProduct);
 router.get('/create-categories', protectAuthAdmin, createCategories);
 router.get('/get-categories', getCategories);
-router.get('/seller', protectAuthSeller, getSellerProducts);
+router.get('/seller-products', protectAuthSeller, getSellerProducts);
 router.get('/:id', getProductById);
 router.get('/category/:categoryId', getProductsByCategory);
 
