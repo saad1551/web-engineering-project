@@ -1,6 +1,6 @@
 const express = require('express');
 
-const protect = require('../middlewares/authMiddleware');
+const protect = require('../middlewares/authSellerMiddleware');
 
 const { registerSeller, verifyEmail, login, logout, forgotPassword, resetPassword, editProfile } = require('../controllers/sellerController');
 
