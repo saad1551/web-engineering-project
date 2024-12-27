@@ -286,4 +286,16 @@ const getCategories = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { addProduct, getAllProducts, createCategories, getCategories };
+// get a single product by ID
+const getProductById = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+        res.status(200).json({product});
+    } else {
+        res.status(404);
+        throw new Error('Product not found');
+    }
+});
+
+module.exports = { addProduct, getAllProducts, createCategories, getCategories, getProductById };
