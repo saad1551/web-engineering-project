@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/productModel');
 const fileSizeFormatter = require('../utils/fileUpload');
+const { get } = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -17,6 +18,14 @@ const addProduct = asyncHandler(async (req, res) => {
     if (!name || !price || !description || !category  ) {
         res.status(400);
         throw new Error('Please add all required fields');
+    }
+
+    // check if the same seller has already listed a product with the same name
+    const productExists = await Product.findOne({ name, sellerId });
+
+    if (productExists) {
+        res.status(400);
+        throw new Error('You have already listed a product with the same name');
     }
 
     const makeToOrder = isMakeToOrder === 'true' ? true : false;
@@ -94,4 +103,11 @@ const addProduct = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { addProduct };
+// get all products, most recently added first
+const getAllProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find().sort({ createdAt: -1 });
+
+    res.status(200).json({ products });
+});
+
+module.exports = { addProduct, getAllProducts };
