@@ -51,8 +51,8 @@ const placeOrder = asyncHandler(async (req, res) => {
         throw new Error('Order could not be created');
     }
 
-    // Schedule status updates
-    scheduleStatusUpdates(order);
+    // // Schedule status updates
+    // scheduleStatusUpdates(order);
 
     res.status(201).json({
         order,
@@ -60,26 +60,26 @@ const placeOrder = asyncHandler(async (req, res) => {
     });
 });
 
-// Function to schedule status updates
-const scheduleStatusUpdates = (order) => {
-    // Change status to 'Processing' after 1 hour
-    setTimeout(async () => {
-        order.status = 'Processing';
-        await order.save();
-    }, 1 * 60 * 60 * 1000);
+// // Function to schedule status updates
+// const scheduleStatusUpdates = (order) => {
+//     // Change status to 'Processing' after 1 hour
+//     setTimeout(async () => {
+//         order.status = 'Processing';
+//         await order.save();
+//     }, 1 * 60 * 60 * 1000);
 
-    // Change status to 'Shipped' after 24 hours
-    setTimeout(async () => {
-        order.status = 'Shipped';
-        await order.save();
-    }, 24 * 60 * 60 * 1000);
+//     // Change status to 'Shipped' after 24 hours
+//     setTimeout(async () => {
+//         order.status = 'Shipped';
+//         await order.save();
+//     }, 24 * 60 * 60 * 1000);
 
-    // Change status to 'Delivered' after deliveryTime
-    setTimeout(async () => {
-        order.status = 'Delivered';
-        await order.save();
-    }, (24 + order.deliveryTime) * 60 * 60 * 1000);
-};
+//     // Change status to 'Delivered' after deliveryTime
+//     setTimeout(async () => {
+//         order.status = 'Delivered';
+//         await order.save();
+//     }, (24 + order.deliveryTime) * 60 * 60 * 1000);
+// };
 
 // Function to retrieve all orders of a particular seller
 const getSellerOrders = asyncHandler(async (req, res) => {
