@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('./middlewares/errorMiddleware');
+const cors = require('cors');
 
 const sellerRouter = require('./routes/sellerRoute');
 const buyerRouter = require('./routes/buyerRoute');
@@ -16,6 +17,12 @@ dotenv.config();
 
 // Initialize express
 const app = express();
+
+// Enable CORS for the frontend
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+}));
 
 // add parsing middlewares
 app.use(bodyParser.json());
