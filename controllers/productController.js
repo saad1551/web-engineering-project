@@ -128,6 +128,7 @@ const addProduct = asyncHandler(async (req, res) => {
         price,
         description,
         categoryId,
+        categoryName,
         sellerId,
         SKU,
         image,

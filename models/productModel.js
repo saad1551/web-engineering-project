@@ -27,6 +27,10 @@ const ProductSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please add a SKU']
     },
+    categoryName: {
+        type: String,
+        required: [true, 'Please add a category name']
+    },
     // image URL
     image: {
         type: String,
