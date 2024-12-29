@@ -11,6 +11,7 @@ const sellerRouter = require('./routes/sellerRoute');
 const buyerRouter = require('./routes/buyerRoute');
 const productRouter = require('./routes/productRoute');
 const adminRouter = require('./routes/adminRoute');
+const orderRouter = require('./routes/orderRoute');
 
 // Load env vars
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/sellers', sellerRouter);
 app.use('/api/buyers', buyerRouter);
 app.use('/api/products/', productRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/orders/', orderRouter);
 
 // Define port
 const PORT = process.env.PORT || 5000;

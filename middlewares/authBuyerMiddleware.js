@@ -22,7 +22,7 @@ const authProtectBuyer = asyncHandler(async(req, res, next) => {
             throw new Error("User not found");
         }
 
-        req.user = user;
+        req.user = buyer;
         next();
     } catch (error) {
         res.status(401);
